@@ -1,0 +1,10 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+{% for label, entries in items %}
+    <h3>{{label}}</h3>
+    {% for entry in entries %}
+        <li><a href="{{entry.path}}">{{entry.title}}</a></li>
+    {% endfor %}
+{% endfor %}
+{% endblock content %}

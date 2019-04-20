@@ -1,0 +1,29 @@
+{% macro render_entry(entry) %}
+    <div class="rss entry">
+        <h3>{{entry.title}}</h3>
+        <div class="rss author">{{entry.author}}</div>
+        <div class="rss published">{{entry.published[:22]}}</div>
+        {{entry.summary}}
+    </div>
+{% endmacro %}
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf8">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu|Open+Sans|Sans">
+        <link rel="stylesheet" href="rss2html.css">
+        <title>{{feed.title}}</title>
+    </head>
+    <body>
+        <h1 class="rss"><a href="{{feed.link}}">{{feed.title}}</a></h2>
+        <nav>
+        <a href="index.html">Home</a>
+        <a href="tags.html">Tags</a>
+        <a href="authors.html">Authors</a>
+        <a href="archive.html">Archive</a>
+        </nav>
+        <p class="rss subtitle">{{feed.subtitle}}<p>
+        {% block content %}{% endblock content %}
+    </body>
+</html>

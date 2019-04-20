@@ -1,0 +1,28 @@
+#+title: rss2html
+
+rss2html is a Python script to generate a static HTML site from a RSS file.
+
+* Installation
+
+~rss2html~ depends on ~jinja2~ and ~feedparser~. Use ~pipenv~ to install.
+
+* Usage
+
+Call ~python rss2html.py <rss.xml>~.
+
+The result will be in the ~html~ directory.
+
+* Use case
+
+My use case is that I want to blog from Emacs' org-mode. I have tried many alternatives, but found it easiest to export my .org file to RSS using ~ox-rss~.
+
+** Caveats
+
+- I needed the latest version of ~org~ (installed through the package manager) instead of the built-in version.
+- org-mode tags didn't work out (~ox-rss~ hangs). I had to set ~org-rss-categories~ and use :CATEGORY: properties instead.
+
+* Tailoring
+
+~rss2html~ uses Jinja2 templates for rendering. If you want to change the output, change the templates in the ~templates~ directory.
+
+Styling is done in ~html/rss2html.css~. Adapt this to your needs.
