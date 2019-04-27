@@ -12,6 +12,8 @@ Call ~python rss2html.py <rss.xml>~.
 
 The result will be in the ~html~ directory.
 
+Entries with the tag ~page~ are added to the menu. This tag is otherwise ignored.
+
 * Use case
 
 My use case is that I want to blog from Emacs' org-mode. I have tried many alternatives, but found it easiest to export my .org file to RSS using ~ox-rss~.
@@ -25,4 +27,4 @@ My use case is that I want to blog from Emacs' org-mode. I have tried many alter
 
 ~rss2html~ uses Jinja2 templates for rendering. If you want to change the output, change the templates in the ~templates~ directory.
 
-Styling is done in ~html/rss2html.css~. Adapt this to your needs.
+Styling is done in ~html/rss2html.css~. Generated HTML elements have class ~rss~. Adapt the CSS to your needs.

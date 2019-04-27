@@ -3,7 +3,6 @@ from collections import defaultdict
 from os import path, mkdir
 from pprint import pprint
 import sys
-from types import SimpleNamespace
 
 import feedparser
 import jinja2
@@ -23,6 +22,38 @@ class Renderer:
 
         self.out_dir = self.check_dir(out_dir, 'Destination')
         print(f'Rendering to "{out_dir}"')
+
+        # analyse entries
+        self.feed.authors = defaultdict(list)
+        self.feed.archive = defaultdict(list)
+        self.feed.tags = defaultdict(list)
+        self.feed.pages = []
+        self.feed.posts = []
+        
+        for n, entry in enumerate(self.entries):
+            # pprint(entry.keys())
+            # sys.exit()
+            entry['authors'] = [author.name for author in entry['authors']]
+            for author in entry['authors']:
+                self.feed.authors[author].append(entry)
+
+            pub = entry['published_parsed']
+            self.feed.archive[f'{pub.tm_year}-%02d' % pub.tm_mon].append(entry)
+
+            entry_type = 'post'
+            if 'tags' in entry:
+                entry['tags'] = [tag.term.lower() for tag in entry['tags'] if tag.term != 'nil']
+                if 'page' in entry['tags']:
+                    entry_type = 'page'
+                    self.feed.pages.append(entry)
+                    entry['tags'].remove('page')
+                else:
+                    self.feed.posts.append(entry)
+                # pprint(entry['tags'])
+                for tag in entry['tags']:
+                        self.feed.tags[tag].append(entry)
+
+            entry['path'] = f'{entry_type}_{n}.html'
 
     @staticmethod
     def check_dir(name, description='Path'):
@@ -49,46 +80,19 @@ class Renderer:
 
         return content
 
-    def preprocess(self):
-        data = SimpleNamespace(
-            authors=defaultdict(list),
-            archive=defaultdict(list),
-            tags=defaultdict(list)
-        )
-        for n, entry in enumerate(self.entries):
-            # pprint(entry.keys())
-            # sys.exit()
-            entry['authors'] = [author.name for author in entry['authors']]
-            for author in entry['authors']:
-                data.authors[author].append(entry)
-
-            pub = entry['published_parsed']
-            data.archive[f'{pub.tm_year}-%02d' % pub.tm_mon].append(entry)
-
-            if 'tags' in entry:
-                entry['tags'] = [tag.term.lower() for tag in entry['tags'] if tag.term != 'nil']
-                # pprint(entry['tags'])
-                for tag in entry['tags']:
-                    data.tags[tag].append(entry)
-
-            entry_type = 'page' if 'tags' in entry and 'page' in entry['tags'] else 'post'
-            entry['path'] = f'{entry_type}_{n}.html'
-        return data
-
     def render_all(self):
-        data = self.preprocess()
-
-        self.render('feed.jinja2', 'index.html', entries=self.entries[:5])
+        length = min(len(self.feed.posts), 5)
+        self.render('feed.jinja2', 'index.html', entries=self.feed.posts[:length])
         print('Wrote index')
         for entry in self.entries:
             self.render('entry.jinja2', entry['path'], entry=entry)
         print('Wrote entries')
 
-        self.render('list.jinja2', 'tags.html', items=sorted(data.tags.items()))
+        self.render('list.jinja2', 'tags.html', items=sorted(self.feed.tags.items()))
         print('Wrote tags')
-        self.render('list.jinja2', 'authors.html', items=sorted(data.authors.items()))
+        self.render('list.jinja2', 'authors.html', items=sorted(self.feed.authors.items()))
         print('Wrote authors')
-        self.render('list.jinja2', 'archive.html', items=sorted(data.archive.items(), reverse=True))
+        self.render('list.jinja2', 'archive.html', items=sorted(self.feed.archive.items(), reverse=True))
         print('Wrote archive')
 
 

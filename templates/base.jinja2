@@ -7,6 +7,12 @@
     </div>
 {% endmacro %}
 
+
+{% macro render_entry_link(entry) %}
+    <a href="{{entry.path}}">{{entry.title}}</a>
+{% endmacro %}
+
+
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf8">
@@ -19,6 +25,9 @@
         <h1 class="rss"><a href="{{feed.link}}">{{feed.title}}</a></h2>
         <nav>
         <a href="index.html">Home</a>
+        {% for page in feed.pages %}
+            {{ render_entry_link(page) }}
+        {% endfor %}
         <a href="tags.html">Tags</a>
         <a href="authors.html">Authors</a>
         <a href="archive.html">Archive</a>
