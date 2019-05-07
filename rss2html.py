@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
-from os import path, mkdir
+import os
 from pprint import pprint
 import sys
 
@@ -10,13 +10,15 @@ import jinja2
 
 class Renderer:
 
-    def __init__(self, feed, out_dir='html'):        
+    def __init__(self, feed, out_dir='html'):
         self.feed = feed['feed']
-        self.feed['title'] = self.feed['title'] or 'My Blog'
+        self.feed['title'] = self.feed['title'] or sys.argv.pop()
         self.entries = feed['entries']
 
+        path = os.path.dirname(os.path.realpath(__file__))
+        path = os.path.join(path, 'templates')
         self.env = jinja2.Environment(
-            loader=jinja2.FileSystemLoader('templates'),
+            loader=jinja2.FileSystemLoader(path),
             trim_blocks=True
         )
 
@@ -29,10 +31,10 @@ class Renderer:
         self.feed.tags = defaultdict(list)
         self.feed.pages = []
         self.feed.posts = []
-        
-        for n, entry in enumerate(self.entries):
-            # pprint(entry.keys())
-            # sys.exit()
+
+        for entry in self.entries:
+            entry['id'] = entry['id'].split('#').pop()
+            entry['path'] = f'{entry["id"]}.html'
             entry['authors'] = [author.name for author in entry['authors']]
             for author in entry['authors']:
                 self.feed.authors[author].append(entry)
@@ -40,30 +42,25 @@ class Renderer:
             pub = entry['published_parsed']
             self.feed.archive[f'{pub.tm_year}-%02d' % pub.tm_mon].append(entry)
 
-            entry_type = 'post'
             if 'tags' in entry:
                 entry['tags'] = [tag.term.lower() for tag in entry['tags'] if tag.term != 'nil']
                 if 'page' in entry['tags']:
-                    entry_type = 'page'
                     self.feed.pages.append(entry)
                     entry['tags'].remove('page')
                 else:
                     self.feed.posts.append(entry)
-                # pprint(entry['tags'])
                 for tag in entry['tags']:
                         self.feed.tags[tag].append(entry)
 
-            entry['path'] = f'{entry_type}_{n}.html'
-
     @staticmethod
     def check_dir(name, description='Path'):
-        if path.exists(name):
-            if not path.isdir(name):
+        if os.path.exists(name):
+            if not os.path.isdir(name):
                 print(f'{description} "{name}" exists but is not a directory')
                 sys.exit(0)
         else:
             try:
-                mkdir(name)
+                os.mkdir(name)
                 print(f'{description} "{name}" created')
             except OSError as e:
                 print(f'Failed to create {description} "{name}": {e}')
@@ -75,7 +72,7 @@ class Renderer:
         content = template.render(feed=self.feed, **kwargs)
 
         if filename:
-            with open(path.join(self.out_dir, filename), 'w') as fout:
+            with open(os.path.join(self.out_dir, filename), 'w') as fout:
                 fout.write(content)
 
         return content

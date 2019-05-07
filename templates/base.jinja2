@@ -22,7 +22,7 @@
         <title>{{feed.title}}</title>
     </head>
     <body>
-        <h1 class="rss"><a href="{{feed.link}}">{{feed.title}}</a></h2>
+        <h1 class="rss">{{feed.title}}</h2>
         <nav>
         <a href="index.html">Home</a>
         {% for page in feed.pages %}
@@ -34,5 +34,10 @@
         </nav>
         <p class="rss subtitle">{{feed.subtitle}}<p>
         {% block content %}{% endblock content %}
+        <footer class="rss">
+            &copy;<script>document.write(new Date().getFullYear())</script> 
+            <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA</a>
+            [<a href="http://validator.w3.org/check?uri=referer">validate</a>]
+        </footer>
     </body>
 </html>
